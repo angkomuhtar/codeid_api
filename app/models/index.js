@@ -1,19 +1,8 @@
-// const DB = require("../config/DB");
 const { Sequelize, DataTypes } = require("sequelize");
-// const sequelize = require("../config/dbConnect");
-const database = require("../config/database.sqlite");
-
-// const Sequelize = require("sequelize");
-// const sequelize = new Sequelize(DB.DB, DB.USER, DB.PASSWORD, {
-//   host: DB.HOST,
-//   dialect: DB.dialect,
-//   operatorAliases: false,
-//   pool: DB.pool,
-// });
-
+const database = require("../config/database.db");
 const sequelize = new Sequelize({
   dialect: "sqlite",
-  storage: "../config/database.sqlite",
+  storage: "../config/database.db",
 });
 
 const db = {};
@@ -21,6 +10,16 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.products = require("./Products.model.js")(sequelize, DataTypes);
+db.products = require("./products.model.js")(sequelize, Sequelize);
+db.orders = require("./orders.model.js")(sequelize, Sequelize);
+db.orderDetails = require("./orderdetails.model.js")(sequelize, Sequelize);
+
+db.orders.hasMany(db.orderDetails, { as: "details" });
+db.products.hasMany(db.orderDetails, { as: "details" });
+db.orderDetails.belongsTo(db.orders, { foreignKey: "orderId", as: "order" });
+db.orderDetails.belongsTo(db.products, {
+  foreignKey: "productId",
+  as: "product",
+});
 
 module.exports = db;
